@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JD Workspace</title>
+  <style>
+    :root {
+      --bg: #0e0f13;
+      --panel: #161922;
+      --panel2: #1c2030;
+      --panel3: #22283b;
+      --text: #f5f7fb;
+      --muted: #a6afc5;
+      --border: rgba(255,255,255,.10);
+      --shadow: 0 20px 55px rgba(0,0,0,.36);
+      --pink: #ff4fa0;
+      --orange: #ff8a5b;
+      --yellow: #ffd86d;
+      --cyan: #59f1d4;
+      --blue: #6ea8ff;
+      --green: #82ef94;
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 12% 0%, rgba(255,79,160,.16), transparent 24%),
+        radial-gradient(circle at 86% 2%, rgba(89,241,212,.12), transparent 20%),
+        linear-gradient(180deg, #14161d 0%, #0b0c10 100%);
+      color: var(--text);
+    }
+    .app { max-width: 1400px; margin: 0 auto; padding: 18px; }
+    .topbar {
+      position: sticky; top: 12px; z-index: 20;
+      padding: 18px 18px 14px;
+      border: 1px solid rgba(0,0,0,.35);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      background: linear-gradient(90deg, var(--pink) 0%, var(--orange) 38%, var(--yellow) 100%);
+      color: #111;
+    }
+    .topbar-row {
+      display: flex; justify-content: space-between; gap: 16px; align-items: center; flex-wrap: wrap;
+    }
+    .brand {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 1000;
+      line-height: .95;
+      letter-spacing: -0.07em;
+      text-transform: uppercase;
+    }
+    .brand small {
+      display: block;
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: 0;
+      opacity: .8;
+      margin-top: 6px;
+      font-weight: 700;
+    }
+    .status {
+      background: rgba(255,255,255,.34);
+      border: 1px solid rgba(0,0,0,.14);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .nav {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px;
+    }
+    .nav button {
+      appearance: none;
+      border: 1px solid rgba(17,17,17,.35);
+      background: rgba(255,255,255,.2);
+      color: #111;
+      font-weight: 900;
+      padding: 10px 15px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .nav button:hover { transform: translateY(-1px); background: rgba(255,255,255,.32); }
+    .nav button.active { background: #111; color: #fff; }
+    .page-title {
+      margin: 26px 0 14px;
+      font-size: clamp(42px, 5vw, 72px);
+      line-height: .92;
+      letter-spacing: -0.08em;
+      text-transform: uppercase;
+    }
+    .subtitle { color: var(--muted); max-width: 860px; line-height: 1.55; font-weight: 600; }
+    .grid { display: grid; gap: 18px; grid-template-columns: 1.18fr .82fr; align-items: start; }
+    .stack { display: grid; gap: 18px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+    .card-head {
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(0,0,0,.12);
+      color: #111;
+      font-weight: 1000;
+      text-transform: uppercase;
+      letter-spacing: -0.04em;
+      display: flex; justify-content: space-between; gap: 12px; align-items: center;
+    }
+    .head-pink { background: linear-gradient(90deg, #ff4fa0, #ff7f69); }
+    .head-cyan { background: linear-gradient(90deg, #59f1d4, #7ce8ff); }
+    .head-yellow { background: linear-gradient(90deg, #ffe77b, #ffd05c); }
+    .head-green { background: linear-gradient(90deg, #90ef80, #63efb3); }
+    .head-blue { background: linear-gradient(90deg, #8eb8ff, #648bff); }
+    .card-body { padding: 18px; }
+    .input, .textarea {
+      width: 100%;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: #0f1219;
+      color: var(--text);
+      padding: 14px 15px;
+      font: inherit;
+      outline: none;
+    }
+    .textarea { min-height: 128px; resize: vertical; line-height: 1.55; }
+    .textarea::placeholder, .input::placeholder { color: #737a91; }
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; margin-top: 12px; }
+    .btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 12px 18px;
+      font-weight: 1000;
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.12);
+    }
+    .btn.primary { background: linear-gradient(180deg, #fff39e, #ffd95b); color: #111; }
+    .btn.dark { background: #252b3a; color: #fff; border: 1px solid rgba(255,255,255,.08); }
+    .hint { color: var(--muted); font-size: 13px; font-weight: 600; }
+    .section { display: none; }
+    .section.active { display: block; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    .three-col { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .list { display: grid; gap: 10px; }
+    .item {
+      display: flex; justify-content: space-between; gap: 12px; align-items: start;
+      background: #10131a; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 12px 14px;
+    }
+    .item b { display: block; margin-bottom: 4px; }
+    .item small { color: var(--muted); }
+    .tag { white-space: nowrap; font-size: 12px; padding: 7px 10px; border-radius: 999px; background: #23293a; border: 1px solid rgba(255,255,255,.08); font-weight: 800; }
+    .pill-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .pill { padding: 9px 12px; border-radius: 999px; background: #10131a; border: 1px solid rgba(255,255,255,.08); font-size: 12px; font-weight: 800; }
+    .chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .chip { background: #10131a; border: 1px solid rgba(255,255,255,.08); color: #fff; padding: 10px 14px; border-radius: 999px; cursor: pointer; font-weight: 800; transition: .15s ease; }
+    .chip:hover { transform: translateY(-1px); }
+    .chip.active { background: #fff; color: #111; }
+    .metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .metric { background: #10131a; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 14px; }
+    .metric span { display: block; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .metric strong { display: block; margin-top: 5px; font-size: 24px; letter-spacing: -0.04em; }
+    .footer { color: var(--muted); font-size: 13px; font-weight: 600; margin-top: 18px; }
+    .feed { display: grid; gap: 12px; }
+    .note { background: #10131a; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 12px 14px; }
+    .note-top { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 8px; }
+    .note-top strong { font-size: 15px; }
+    .note-top span { color: var(--muted); font-size: 12px; font-weight: 700; }
+    .note p { margin: 0; line-height: 1.55; color: #e8ebf3; }
+    .demo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .demo {
+      position: relative; aspect-ratio: 16 / 9; border-radius: 18px; overflow: hidden;
+      background: linear-gradient(135deg, rgba(255,79,160,.22), rgba(255,216,109,.12)), #151923;
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .demo::before, .demo::after { content: ""; position: absolute; inset: 18px; border-radius: 14px; border: 2px dashed rgba(255,255,255,.18); }
+    .demo::after { inset: auto 18px 18px 18px; height: 30%; border-style: solid; border-color: rgba(255,255,255,.14); }
+    .demo .label { position: absolute; top: 14px; left: 14px; background: rgba(17,17,17,.72); border-radius: 999px; padding: 7px 10px; font-size: 12px; font-weight: 800; }
+    .demo .sub { position: absolute; left: 14px; right: 14px; bottom: 14px; color: #fff; font-size: 14px; font-weight: 800; text-shadow: 0 2px 10px rgba(0,0,0,.45); }
+    .summary-list { display: grid; gap: 12px; }
+    .summary-item { background: #10131a; border: 1px solid rgba(255,255,255,.08); border-radius: 18px; padding: 12px 14px; }
+    .summary-item strong { display: block; margin-bottom: 4px; }
+    .summary-item small { color: var(--muted); }
+    @media (max-width: 1100px) { .grid, .two-col, .three-col { grid-template-columns: 1fr; } .metrics { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 700px) { .metrics, .demo-grid { grid-template-columns: 1fr; } .app { padding: 12px; } .topbar { border-radius: 22px; } }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="topbar-row">
+        <div class="brand">JD Workspace <small>Free cloud-ready personal OS for business, study, health, and memory</small></div>
+        <div class="status" id="saveStatus">0 memories saved</div>
+      </div>
+      <nav class="nav" aria-label="Workspace navigation">
+        <button class="active" data-target="home">Home</button>
+        <button data-target="daily">Daily</button>
+        <button data-target="business">Business</button>
+        <button data-target="clients">Clients</button>
+        <button data-target="leads">Leads</button>
+        <button data-target="projects">Projects</button>
+        <button data-target="learning">Learning</button>
+        <button data-target="health">Health</button>
+        <button data-target="vault">Memory Vault</button>
+      </nav>
+    </header>
+
+    <main>
+      <div class="page-title">Workspace</div>
+      <div class="subtitle">This free version is designed to work on Vercel or any static host. You can update the file and redeploy later, and it will be accessible from phone and PC through a URL.</div>
+
+      <section class="section active" id="home">
+        <div class="grid">
+          <div class="stack">
+            <article class="card">
+              <div class="card-head head-pink"><div>Memory input</div><div class="tag">Save locally</div></div>
+              <div class="card-body">
+                <textarea id="memoryInput" class="textarea" placeholder="Type an idea, reminder, task, lead, summary, or thought..."></textarea>
+                <div class="row">
+                  <div class="hint">This free starter stores data in your browser. You can upgrade to a real database later.</div>
+                  <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn dark" id="clearBtn">Clear</button>
+                    <button class="btn primary" id="saveBtn">Save</button>
+                  </div>
+                </div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head head-cyan"><div>Today’s priorities</div><div class="tag">Top 3</div></div>
+              <div class="card-body list">
+                <div class="item"><div><b>Grow the tool website</b><small>SEO, content, links, monetization.</small></div><span class="tag">Primary</span></div>
+                <div class="item"><div><b>Send outreach messages</b><small>Cleaning companies and local service leads.</small></div><span class="tag">Leads</span></div>
+                <div class="item"><div><b>Protect sleep and exercise</b><small>Energy is part of the strategy.</small></div><span class="tag">Health</span></div>
+              </div>
+            </article>
+
+            <article class="card">
+              <div class="card-head head-yellow"><div>Daily review</div><div class="tag">Morning / evening</div></div>
+              <div class="card-body summary-list">
+                <div class="summary-item"><strong>What matters today?</strong><small>One business move, one communication move, one health move.</small></div>
+                <div class="summary-item"><strong>What can wait?</strong><small>Anything not tied to your current top priorities.</small></div>
+                <div class="summary-item"><strong>What counts as success?</strong><small>At least one finished result, not just planning.</small></div>
+              </div>
+            </article>
+          </div>
+
+          <div class="stack">
+            <article class="card">
+              <div class="card-head head-green"><div>Workspace stats</div><div class="tag">Simple</div></div>
+              <div class="card-body">
+                <div class="metrics">
+                  <div class="metric"><span>Memories</span><strong id="memoryCount">0</strong></div>
+                  <div class="metric"><span>Focus</span><strong>High</strong></div>
+                  <div class="metric"><span>Phase</span><strong>Build</strong></div>
+                </div>
+              </div>
+            </article>
+            <article class="card">
+              <div class="card-head head-blue"><div>Demo media</div><div class="tag">Placeholder</div></div>
+              <div class="card-body">
+                <div class="demo-grid">
+                  <div class="demo"><div class="label">Book summary</div><div class="sub">Use this spot for summaries later.</div></div>
+                  <div class="demo"><div class="label">Weird knowledge</div><div class="sub">Use this spot for daily useful facts.</div></div>
+                </div>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="daily">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-cyan"><div>Day review</div><div class="tag">Check-in</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>What happened yesterday?</b><small>Short reflection and lessons.</small></div><span class="tag">Review</span></div>
+              <div class="item"><div><b>What must happen today?</b><small>Only the unavoidable items.</small></div><span class="tag">Plan</span></div>
+              <div class="item"><div><b>What can I ignore?</b><small>Distractions, extra ideas, low-value work.</small></div><span class="tag">Filter</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-yellow"><div>Today’s outcome</div><div class="tag">Win condition</div></div>
+            <div class="card-body summary-list">
+              <div class="summary-item"><strong>One business win</strong><small>Website, clients, leads, or content.</small></div>
+              <div class="summary-item"><strong>One study win</strong><small>Assignment, reading, revision, or notes.</small></div>
+              <div class="summary-item"><strong>One health win</strong><small>Exercise, sleep, food, prayer, walk.</small></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="business">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-cyan"><div>Business board</div><div class="tag">Assets</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Calculator / tool website</b><small>Traffic asset, ranking, future monetization.</small></div><span class="tag">SEO</span></div>
+              <div class="item"><div><b>SEO / digital services</b><small>Offer to local businesses.</small></div><span class="tag">Service</span></div>
+              <div class="item"><div><b>Media channel</b><small>One primary creator asset only.</small></div><span class="tag">Media</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-pink"><div>Monetization ideas</div><div class="tag">Switch</div></div>
+            <div class="card-body">
+              <div class="chip-row" id="bizChips">
+                <div class="chip active" data-chip="ads">Ads</div>
+                <div class="chip" data-chip="leads">Lead gen</div>
+                <div class="chip" data-chip="services">Services</div>
+                <div class="chip" data-chip="content">Content</div>
+              </div>
+              <div style="margin-top:14px; color:var(--muted); line-height:1.6; font-weight:600;" id="bizText">Use the tool site to attract traffic, then monetize through ads, partnerships, or related services.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="clients">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-yellow"><div>Client tracker</div><div class="tag">CRM-lite</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Client info</b><small>Business name, website, goals, notes.</small></div><span class="tag">Profile</span></div>
+              <div class="item"><div><b>Tasks completed</b><small>Log work, results, and next steps.</small></div><span class="tag">Work</span></div>
+              <div class="item"><div><b>Communication history</b><small>Keep messages and decisions visible.</small></div><span class="tag">Notes</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-green"><div>Pipeline</div><div class="tag">Stages</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>New lead</b><small>Not contacted yet.</small></div><span class="tag">1</span></div>
+              <div class="item"><div><b>Contacted / replied</b><small>Conversation started.</small></div><span class="tag">2</span></div>
+              <div class="item"><div><b>Meeting / proposal / won</b><small>Track the conversion path.</small></div><span class="tag">3</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="leads">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-pink"><div>Lead sources</div><div class="tag">Inputs</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Scraped business lists</b><small>Sort by niche, country, and status.</small></div><span class="tag">Data</span></div>
+              <div class="item"><div><b>Local service businesses</b><small>Cleaning companies, trades, service providers.</small></div><span class="tag">Target</span></div>
+              <div class="item"><div><b>Follow-up calendar</b><small>Never forget the next contact date.</small></div><span class="tag">System</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-blue"><div>Lead actions</div><div class="tag">Daily</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Send 5 messages</b><small>Short, relevant outreach only.</small></div><span class="tag">Daily</span></div>
+              <div class="item"><div><b>Follow up 2 leads</b><small>Keep momentum alive.</small></div><span class="tag">Repeat</span></div>
+              <div class="item"><div><b>Log outcomes</b><small>Reply / meeting / lost / won.</small></div><span class="tag">Track</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="projects">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-cyan"><div>Projects</div><div class="tag">Current</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Tool website</b><small>Rank, improve, monetize.</small></div><span class="tag">1</span></div>
+              <div class="item"><div><b>SEO services system</b><small>Create offers and simple SOPs.</small></div><span class="tag">2</span></div>
+              <div class="item"><div><b>Primary media asset</b><small>One channel with consistency.</small></div><span class="tag">3</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-yellow"><div>Project rule</div><div class="tag">Important</div></div>
+            <div class="card-body">
+              <div class="subtitle" style="max-width:none; color:#e9ebf3;">Don’t start new projects unless they directly support your top priorities. This workspace is meant to keep you focused, not busy.</div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="learning">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-green"><div>Learning</div><div class="tag">Books &amp; skills</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>SEO / marketing</b><small>For traffic and client growth.</small></div><span class="tag">Skill</span></div>
+              <div class="item"><div><b>AI tools</b><small>Use for speed and leverage.</small></div><span class="tag">Skill</span></div>
+              <div class="item"><div><b>Productivity</b><small>Focus, planning, execution.</small></div><span class="tag">Habit</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-pink"><div>Reading / summaries</div><div class="tag">Digest</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Book summary</b><small>Key ideas, lessons, and action items.</small></div><span class="tag">Summary</span></div>
+              <div class="item"><div><b>Newsletter summary</b><small>Only the useful signals.</small></div><span class="tag">Digest</span></div>
+              <div class="item"><div><b>Weird knowledge</b><small>Interesting, surprising, memorable facts.</small></div><span class="tag">Fun</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="health">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-yellow"><div>Health</div><div class="tag">Energy</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Sleep earlier</b><small>Protect energy for deep work.</small></div><span class="tag">Sleep</span></div>
+              <div class="item"><div><b>Exercise</b><small>Make movement automatic.</small></div><span class="tag">Move</span></div>
+              <div class="item"><div><b>Eat cleaner</b><small>Reduce junk and excess sugar.</small></div><span class="tag">Fuel</span></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-blue"><div>Habits</div><div class="tag">Daily</div></div>
+            <div class="card-body">
+              <div class="pill-row">
+                <div class="pill">Prayer</div>
+                <div class="pill">Exercise</div>
+                <div class="pill">Read</div>
+                <div class="pill">Plan</div>
+                <div class="pill">Focus</div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="vault">
+        <div class="two-col">
+          <article class="card">
+            <div class="card-head head-pink"><div>Memory Vault feed</div><div class="tag">Local save</div></div>
+            <div class="card-body">
+              <div class="feed" id="feed"></div>
+            </div>
+          </article>
+          <article class="card">
+            <div class="card-head head-cyan"><div>Vault rules</div><div class="tag">Guidance</div></div>
+            <div class="card-body list">
+              <div class="item"><div><b>Keep only useful memories</b><small>Ideas, reminders, decisions, and summaries.</small></div><span class="tag">Rule</span></div>
+              <div class="item"><div><b>Prefer short entries</b><small>Easy to review later.</small></div><span class="tag">Rule</span></div>
+              <div class="item"><div><b>Focus on priorities</b><small>New ideas must support the plan.</small></div><span class="tag">Rule</span></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="footer">Free starter version. When you’re ready, connect it to GitHub and deploy on Vercel for a public URL.</div>
+  </div>
+
+  <script>
+    const sections = document.querySelectorAll('.section');
+    const navBtns = document.querySelectorAll('.nav button');
+    navBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        navBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        sections.forEach(s => s.classList.toggle('active', s.id === target));
+      });
+    });
+
+    const memoryInput = document.getElementById('memoryInput');
+    const saveBtn = document.getElementById('saveBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const feed = document.getElementById('feed');
+    const memoryCount = document.getElementById('memoryCount');
+    const saveStatus = document.getElementById('saveStatus');
+
+    const storeKey = 'jd_workspace_memories_v1';
+    const saved = JSON.parse(localStorage.getItem(storeKey) || '[]');
+
+    function renderFeed() {
+      feed.innerHTML = '';
+      const items = saved.slice().reverse();
+      if (!items.length) {
+        feed.innerHTML = '<div class="note"><div class="note-top"><strong>No memories yet</strong><span>Start with a thought</span></div><p>Your saved notes will appear here.</p></div>';
+      } else {
+        items.forEach((item, idx) => {
+          const note = document.createElement('div');
+          note.className = 'note';
+          note.innerHTML = `<div class="note-top"><strong>Memory ${items.length - idx}</strong><span>${new Date(item.time).toLocaleString()}</span></div><p>${item.text.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`;
+          feed.appendChild(note);
+        });
+      }
+      memoryCount.textContent = String(saved.length);
+      saveStatus.textContent = `${saved.length} memories saved`;
+    }
+
+    saveBtn.addEventListener('click', () => {
+      const text = memoryInput.value.trim();
+      if (!text) return;
+      saved.push({ text, time: Date.now() });
+      localStorage.setItem(storeKey, JSON.stringify(saved));
+      memoryInput.value = '';
+      renderFeed();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      memoryInput.value = '';
+      memoryInput.focus();
+    });
+
+    document.querySelectorAll('#bizChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#bizChips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const copy = {
+          ads: 'Use the tool site to attract traffic, then monetize through ads, partnerships, or related services.',
+          leads: 'Turn the website into a lead source for your SEO and local service offers.',
+          services: 'Use the site and content to package and sell SEO or website support services.',
+          content: 'Use content to build trust, search visibility, and a long-term audience.'
+        };
+        document.getElementById('bizText').textContent = copy[chip.dataset.chip];
+      });
+    });
+
+    renderFeed();
+  </script>
+</body>
+</html>
